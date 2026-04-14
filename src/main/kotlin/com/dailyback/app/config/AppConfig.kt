@@ -26,6 +26,7 @@ data class AppConfig(
             val migrationEnabled = environment["FLYWAY_ENABLED"]?.toBooleanStrictOrNull() ?: true
             val migrationLocation = environment["FLYWAY_LOCATION"] ?: "classpath:db/migration"
             val seedEnabled = environment["SEED_ENABLED"]?.toBooleanStrictOrNull() ?: true
+            val scenarioSeedEnabled = environment["SEED_SCENARIO_ENABLED"]?.toBooleanStrictOrNull() ?: false
             val maintenanceEnabled = environment["RECURRENCE_MAINTENANCE_ENABLED"]?.toBooleanStrictOrNull() ?: true
             val maintenanceIntervalHours = environment["RECURRENCE_MAINTENANCE_INTERVAL_HOURS"]?.toLongOrNull() ?: 24L
 
@@ -47,6 +48,7 @@ data class AppConfig(
                 ),
                 seed = SeedConfig(
                     enabled = seedEnabled,
+                    scenarioEnabled = scenarioSeedEnabled,
                 ),
                 scheduler = SchedulerConfig(
                     recurrenceMaintenanceEnabled = maintenanceEnabled,
@@ -94,6 +96,7 @@ data class FlywayConfig(
 
 data class SeedConfig(
     val enabled: Boolean,
+    val scenarioEnabled: Boolean,
 )
 
 data class SchedulerConfig(

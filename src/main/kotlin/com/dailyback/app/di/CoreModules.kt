@@ -34,6 +34,7 @@ import com.dailyback.shared.application.maintenance.RecurrenceMaintenanceService
 import com.dailyback.shared.application.health.GetHealthStatusUseCase
 import com.dailyback.shared.application.seeds.CategorySeedRepository
 import com.dailyback.shared.application.seeds.SeedDefaultCategoriesUseCase
+import com.dailyback.shared.application.seeds.SeedScenarioDataUseCase
 import com.dailyback.shared.domain.health.DatabaseHealthChecker
 import com.dailyback.shared.domain.seeds.DefaultCategoriesSeedProvider
 import com.dailyback.shared.infrastructure.database.DatabaseFactory
@@ -76,6 +77,7 @@ fun coreModule(
 
     single<CategorySeedRepository> { ExposedCategorySeedRepository(get()) }
     single { SeedDefaultCategoriesUseCase(get(), get()) }
+    single { SeedScenarioDataUseCase(get()) }
     single { ListCategoriesUseCase(get()) }
     single { GetCategoryByIdUseCase(get()) }
     single { CreateCategoryUseCase(get()) }
@@ -102,5 +104,5 @@ fun coreModule(
     single { GetDashboardNext12MonthsProjectionUseCase(get(), get()) }
     single { RecurrenceMaintenanceService(get(), get(), get()) }
     single { GetHealthStatusUseCase(get(), get()) }
-    single { StartupInitializer(get(), get(), get(), get(), get()) }
+    single { StartupInitializer(get(), get(), get(), get(), get(), get()) }
 }

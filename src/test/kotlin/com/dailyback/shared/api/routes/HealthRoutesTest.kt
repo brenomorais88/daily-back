@@ -77,6 +77,7 @@ private fun testConfig(): AppConfig = AppConfig(
     ),
     seed = SeedConfig(
         enabled = false,
+        scenarioEnabled = false,
     ),
     scheduler = SchedulerConfig(
         recurrenceMaintenanceEnabled = false,

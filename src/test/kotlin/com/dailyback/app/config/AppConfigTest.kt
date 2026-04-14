@@ -23,6 +23,7 @@ class AppConfigTest {
         assertTrue(config.flyway.enabled)
         assertEquals("classpath:db/migration", config.flyway.location)
         assertTrue(config.seed.enabled)
+        assertFalse(config.seed.scenarioEnabled)
         assertTrue(config.scheduler.recurrenceMaintenanceEnabled)
         assertEquals(24L, config.scheduler.recurrenceMaintenanceIntervalHours)
     }
@@ -44,6 +45,7 @@ class AppConfigTest {
                 "FLYWAY_ENABLED" to "false",
                 "FLYWAY_LOCATION" to "classpath:db/custom",
                 "SEED_ENABLED" to "false",
+                "SEED_SCENARIO_ENABLED" to "true",
                 "RECURRENCE_MAINTENANCE_ENABLED" to "false",
                 "RECURRENCE_MAINTENANCE_INTERVAL_HOURS" to "12",
             ),
@@ -62,6 +64,7 @@ class AppConfigTest {
         assertFalse(config.flyway.enabled)
         assertEquals("classpath:db/custom", config.flyway.location)
         assertFalse(config.seed.enabled)
+        assertTrue(config.seed.scenarioEnabled)
         assertFalse(config.scheduler.recurrenceMaintenanceEnabled)
         assertEquals(12L, config.scheduler.recurrenceMaintenanceIntervalHours)
     }

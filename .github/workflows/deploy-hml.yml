@@ -1,0 +1,57 @@
+name: Deploy HML
+
+on:
+  workflow_run:
+    workflows: ["Build Docker Image"]
+    types:
+      - completed
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hml
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'develop'
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to DigitalOcean Droplet via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          command_timeout: 30m
+          script_stop: true
+          envs: GITHUB_SHA,GITHUB_REF_NAME
+          script: |
+            set -euo pipefail
+
+            export DEPLOY_PATH="${{ secrets.HML_DEPLOY_PATH }}"
+            export DEPLOY_BRANCH="develop"
+            export APP_HEALTHCHECK_URL="${{ secrets.HML_HEALTHCHECK_URL }}"
+            export APP_SERVICE_NAME="app"
+            export APP_IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/daily-back"
+            export GHCR_IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/daily-back"
+            export GHCR_USERNAME="${{ secrets.GHCR_USERNAME }}"
+            export GHCR_TOKEN="${{ secrets.GHCR_TOKEN }}"
+            if [ "${{ github.event_name }}" = "workflow_run" ]; then
+              export DOCKER_IMAGE_TAG="sha-${{ github.event.workflow_run.head_sha }}"
+              export DOCKER_IMAGE_TAG="${DOCKER_IMAGE_TAG:0:11}"
+            else
+              export DOCKER_IMAGE_TAG="develop"
+            fi
+
+            bash "${DEPLOY_PATH}/scripts/deploy-hml.sh"

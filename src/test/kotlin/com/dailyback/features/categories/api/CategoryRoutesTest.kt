@@ -189,7 +189,10 @@ private fun testConfig(): AppConfig = AppConfig(
         enabled = false,
         location = "classpath:db/migration",
     ),
-    seed = SeedConfig(enabled = false),
+    seed = SeedConfig(
+        enabled = false,
+        scenarioEnabled = false,
+    ),
     scheduler = SchedulerConfig(
         recurrenceMaintenanceEnabled = false,
         recurrenceMaintenanceIntervalHours = 24,

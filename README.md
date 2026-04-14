@@ -93,6 +93,7 @@ Environment variables:
 - `FLYWAY_ENABLED`: enable migrations at startup
 - `FLYWAY_LOCATION`: migration location (default `classpath:db/migration`)
 - `SEED_ENABLED`: enable default category seeding at startup
+- `SEED_SCENARIO_ENABLED`: enable temporary rich scenario seed data (`[TMP]`) for local tests
 - `RECURRENCE_MAINTENANCE_ENABLED`: enable in-process maintenance scheduler
 - `RECURRENCE_MAINTENANCE_INTERVAL_HOURS`: scheduler interval in hours
 
