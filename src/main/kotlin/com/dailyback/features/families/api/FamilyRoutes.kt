@@ -123,6 +123,14 @@ fun Route.familyRoutes(
             call.respond(permissions.toResponse())
         }
 
+        get("/current/me/permissions") {
+            val userId = call.requireJwtUserId()
+            val permissions = runCatching {
+                familyMemberPermissionService.getMyPermissions(userId)
+            }.getOrElse { throw mapFamilyException(it) }
+            call.respond(permissions.toResponse())
+        }
+
         put("/current/members/{memberId}/permissions") {
             val userId = call.requireJwtUserId()
             val memberId = call.parameters["memberId"].toUuidOrBadRequest("memberId")

@@ -2,6 +2,7 @@ package com.dailyback.features.families.application
 
 import com.dailyback.features.families.domain.FamilyMember
 import com.dailyback.features.families.domain.FamilyMemberNotFoundException
+import com.dailyback.features.families.domain.NoFamilyForUserException
 import com.dailyback.features.families.domain.NotFamilyAdminException
 import com.dailyback.shared.domain.family.FamilyMemberPermissionFlags
 import com.dailyback.shared.domain.family.FamilyMemberRole
@@ -33,6 +34,72 @@ class FamilyMemberPermissionServiceTest {
         val flags = service.getMemberPermissions(adminUser, adminMemberId)
         assertTrue(flags.canDeleteFamilyAccounts)
         assertTrue(flags.canManageMembers)
+    }
+
+    @Test
+    fun `getMyPermissions should return all granted for active admin`() {
+        val adminMemberId = UUID.randomUUID()
+        val members = mapOf(
+            adminMemberId to stubMember(adminMemberId, adminUser, FamilyMemberRole.ADMIN),
+        )
+        val service = FamilyMemberPermissionService(
+            FakeMemberRepoForPermissions(members),
+            RecordingPermRepo(),
+        )
+
+        val flags = service.getMyPermissions(adminUser)
+
+        assertTrue(flags.canDeleteFamilyAccounts)
+        assertTrue(flags.canManageMembers)
+    }
+
+    @Test
+    fun `getMyPermissions should return stored flags for active member`() {
+        val memberMemberId = UUID.randomUUID()
+        val stored = FamilyMemberPermissionFlags.memberDefaults().copy(
+            canViewFamilyAccounts = true,
+            canMarkFamilyAccountsPaid = true,
+        )
+        val members = mapOf(
+            memberMemberId to stubMember(memberMemberId, memberUser, FamilyMemberRole.MEMBER),
+        )
+        val service = FamilyMemberPermissionService(
+            FakeMemberRepoForPermissions(members),
+            RecordingPermRepo(initial = mapOf(memberMemberId to stored)),
+        )
+
+        val flags = service.getMyPermissions(memberUser)
+
+        assertEquals(true, flags.canMarkFamilyAccountsPaid)
+        assertEquals(true, flags.canViewFamilyAccounts)
+    }
+
+    @Test
+    fun `getMyPermissions should return default flags when none are stored`() {
+        val memberMemberId = UUID.randomUUID()
+        val members = mapOf(
+            memberMemberId to stubMember(memberMemberId, memberUser, FamilyMemberRole.MEMBER),
+        )
+        val service = FamilyMemberPermissionService(
+            FakeMemberRepoForPermissions(members),
+            RecordingPermRepo(),
+        )
+
+        val flags = service.getMyPermissions(memberUser)
+
+        assertEquals(FamilyMemberPermissionFlags.memberDefaults(), flags)
+    }
+
+    @Test
+    fun `getMyPermissions should fail when user has no family membership`() {
+        val service = FamilyMemberPermissionService(
+            FakeMemberRepoForPermissions(emptyMap()),
+            RecordingPermRepo(),
+        )
+
+        assertFailsWith<NoFamilyForUserException> {
+            service.getMyPermissions(UUID.randomUUID())
+        }
     }
 
     @Test

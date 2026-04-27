@@ -13,6 +13,18 @@ class FamilyMemberPermissionService(
     private val familyMemberRepository: FamilyMemberRepository,
     private val permissionRepository: FamilyMemberPermissionRepository,
 ) {
+    fun getMyPermissions(actorUserId: UUID): FamilyMemberPermissionFlags {
+        val membership = familyMemberRepository.findActiveMembershipForUser(actorUserId)
+            ?: throw NoFamilyForUserException()
+        if (membership.status == FamilyMembershipStatus.REMOVED) {
+            throw NoFamilyForUserException()
+        }
+        if (membership.role == FamilyMemberRole.ADMIN && membership.status == FamilyMembershipStatus.ACTIVE) {
+            return FamilyMemberPermissionFlags.allGranted()
+        }
+        return permissionRepository.findByMemberId(membership.id) ?: FamilyMemberPermissionFlags.memberDefaults()
+    }
+
     fun getMemberPermissions(actorUserId: UUID, targetMemberId: UUID): FamilyMemberPermissionFlags {
         val actor = requireActiveFamilyAdmin(actorUserId)
         val target = loadTargetInFamily(targetMemberId, actor.familyId)
