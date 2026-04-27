@@ -36,10 +36,22 @@ jobs:
       - name: Build application
         run: ./gradlew build --stacktrace
 
+      - name: Ensure PR token is configured
+        shell: bash
+        env:
+          PR_CREATOR_TOKEN: ${{ secrets.PR_CREATOR_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${PR_CREATOR_TOKEN}" ]]; then
+            echo "::error::Repository secret PR_CREATOR_TOKEN is missing."
+            echo "::error::Create a PAT (classic) with 'repo' scope and save it as PR_CREATOR_TOKEN."
+            exit 1
+          fi
+
       - name: Create pull request to develop when missing
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PR_CREATOR_TOKEN }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
